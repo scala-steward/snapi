@@ -76,6 +76,7 @@ lazy val buildSettings = Seq(
   startYear := Some(2023),
   headerLicense := Some(HeaderLicense.Custom(licenseHeader)),
   scalaVersion := Dependencies.scalacVersion,
+  graalvmVersion := Dependencies.graalvmVersion,
   // avoid including scala version in artifact name
   javacOptions ++= Seq(
     "-source",
@@ -499,6 +500,12 @@ lazy val rawCompilerRql2Truffle = (project in file("raw-compiler-rql2-truffle"))
     )
   )
 
+lazy val baseImageTag = s"ol${Dependencies.oracleLinuxVersion}-java${Dependencies.javaDockerMajorVersion}-${Dependencies.graalvmVersion}"
+lazy val dockerSettings = Seq(
+  dockerRepository := "ghcr.io/raw-labs/snapi",
+  dockerBaseImage := s"ghcr.io/graalvm/graalvm-ce:${baseImageTag}",
+)
+
 lazy val rawCli = (project in file("raw-cli"))
   .dependsOn(
     rawCompilerRql2Truffle,
@@ -538,6 +545,7 @@ lazy val rawCli = (project in file("raw-cli"))
     },
     excludeDependencies += "commons-logging" % "commons-logging"
   )
+  .settings(dockerSettings)
 
 val buildSnapi = taskKey[Unit]("Builds the snapi script.")
 
